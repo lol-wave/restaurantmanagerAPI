@@ -27,6 +27,11 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+
+@router.post("/login/", response_model=User)
+def login_user():
+    pass # Implement login logic here
+
 @router.get("/users/{user_id}", response_model=User)
 def get_user(
     user_id: int,
