@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from core.security import hash_password
+from core.security import hash_password, verify_password
 from ...database import get_db
 from ...dependencies import get_current_user_id
 from .models import UserModel
@@ -29,8 +29,13 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login/", response_model=User)
-def login_user():
-    pass # Implement login logic here
+def login_user(user: UserLogin, db: Session= Depends(get_db)):
+    target_user= db.query(UserModel).filter(or_(UserModel.username == user.login, UserModel.email == user.login)).first()
+    if not target_user:
+    	raise HTTPException(status_code=401, detail= "Login or password is incorrect!")
+    if verify_password(user.password, target_user.hashed_password):
+    	pass
+    
 
 @router.get("/users/{user_id}", response_model=User)
 def get_user(
