@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
-from core.security import hash_password
+from core.security import hash_password, verify_password, create_access_token
 from ...database import get_db
 from ...dependencies import get_current_user_id
 from .models import UserModel
-from .schemas import User, UserCreate, UserLogin, UserResponse
+from .schemas import UserCreate, UserLogin, UserResponse
+
+
 
 router = APIRouter()
 
@@ -32,7 +35,18 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login/", response_model=UserResponse)
 def login_user(user: UserLogin, db: Session = Depends(get_db)):
-    pass
+    target_user = db.query(UserModel).filter(or_(UserModel.username == user.login, UserModel.email == user.login)).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Incorrect login or password!")
+    if not verify_password(user.password, target_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect login or password!")
+
+    access_token = create_access_token({"sub": str(target_user.id)})
+    
+    return {
+        "user": target_user,
+        "tokens": {"access_token": access_token, "token_type": "bearer"},
+    }
 
 @router.get("/users/{user_id}", response_model=UserResponse)
 def get_user(

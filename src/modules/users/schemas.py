@@ -23,5 +23,5 @@ class UserCreate(BaseModel):
     password_confirm: str
 
 class UserLogin(BaseModel):
-    username: str
+    login: str
     password: str
