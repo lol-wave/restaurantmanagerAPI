@@ -5,15 +5,17 @@ from core.security import hash_password
 from ...database import get_db
 from ...dependencies import get_current_user_id
 from .models import UserModel
-from .schemas import User, UserCreate
+from .schemas import User, UserCreate, UserLogin, UserResponse
 
 router = APIRouter()
 
-@router.post("/register/", response_model=User)
+@router.post("/register/", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(UserModel).filter((UserModel.username == user.username) | (UserModel.email == user.email)).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username or email already registered")
+    if user.password != user.password_confirm:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
 
     new_user = UserModel(
         username=user.username,
@@ -28,11 +30,11 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/login/", response_model=User)
-def login_user():
-    pass # Implement login logic here
+@router.post("/login/", response_model=UserResponse)
+def login_user(user: UserLogin, db: Session = Depends(get_db)):
+    pass
 
-@router.get("/users/{user_id}", response_model=User)
+@router.get("/users/{user_id}", response_model=UserResponse)
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),

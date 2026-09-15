@@ -1,21 +1,27 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
-class UserBase(BaseModel):
-    username: str
-    email: EmailStr
-    phone_number: str
-    full_name: str
+from modules.restaurants.schemas import RestaurantResponse
 
-class UserCreate(UserBase):
-    password: str
-
-class User(UserBase):
-    model_config = {
-        "from_attributes": True,
-    }
+class UserResponse(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
     id: int
     username: str
     email: EmailStr
     phone_number: str
     full_name: str
+    restaurants: list[RestaurantResponse] = []
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    phone_number: str
+    full_name: str
+    password: str
+    password_confirm: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
