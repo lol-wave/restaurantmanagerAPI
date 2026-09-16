@@ -58,3 +58,9 @@ def get_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+    
+@router.get("/me/", response_model=UserResponse)
+def myself(db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+	user = db.query(UserModel).filter(UserModel.id == current_user_id).first()
+	return user
+	
