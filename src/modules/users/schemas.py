@@ -25,3 +25,8 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     login: str
     password: str
+
+
+class LoginResponse(BaseModel):
+    user: UserResponse
+    tokens: dict[str, str]

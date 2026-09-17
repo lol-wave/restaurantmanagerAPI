@@ -3,10 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from core.security import hash_password, verify_password, create_access_token
-from ...database import get_db
-from ...dependencies import get_current_user_id
+from ...dependencies import get_current_user_id, get_db
 from .models import UserModel
-from .schemas import UserCreate, UserLogin, UserResponse
+from .schemas import LoginResponse, UserCreate, UserLogin, UserResponse
 
 
 
@@ -33,7 +32,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/login/", response_model=UserResponse)
+@router.post("/login/", response_model=LoginResponse)
 def login_user(user: UserLogin, db: Session = Depends(get_db)):
     target_user = db.query(UserModel).filter(or_(UserModel.username == user.login, UserModel.email == user.login)).first()
     if not target_user:
