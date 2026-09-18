@@ -17,6 +17,7 @@ class RestaurantModel(Base):
     contacts = relationship("ContactModel", back_populates="restaurant")
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     owner = relationship("UserModel", back_populates="restaurants")
+    working_hours = Column(JSON, nullable=True)
 
 
 class ContactModel(Base):
