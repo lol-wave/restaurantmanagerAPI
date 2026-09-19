@@ -25,8 +25,8 @@ class ContactModel(Base):
     __tablename__ = "contacts"
 
     id = Column(Integer, primary_key=True, index=True)
-    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False)
     instagram = Column(String, nullable=True)
     facebook = Column(String, nullable=True)
     telegram = Column(String, nullable=True)
+    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False)
     restaurant = relationship("RestaurantModel", back_populates="contacts")

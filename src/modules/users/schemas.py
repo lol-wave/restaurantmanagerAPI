@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from modules.restaurants.schemas import RestaurantResponse
+from ...modules.restaurants.schemas import RestaurantResponse
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(

@@ -8,7 +8,7 @@ class MenuModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False)
-    categories = relationship("CategoryModel", back_populates="menu")
+    categories = relationship("CategoryModel")
 
 class CategoryModel(Base):
     __tablename__ = "categories"
@@ -27,6 +27,7 @@ class ItemModel(Base):
     picture_url = Column(String, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     category = relationship("CategoryModel", back_populates="items")
+    options = relationship("ItemOptionModel", back_populates="item")
 
 class ItemOptionModel(Base):
     __tablename__ = "item_options"
