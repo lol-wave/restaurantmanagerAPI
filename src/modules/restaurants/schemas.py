@@ -4,38 +4,40 @@ from datetime import time
 class DayHours(BaseModel):
     start: time | None = None
     end: time | None = None
-    is_closed: bool = Field(default=False, description="Indicates if the restaurant is closed on this day")
+    is_closed: bool = Field(default=False)
 
 class WorkingHours(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    monday: DayHours = Field(default_factory=DayHours, description="Working hours for Monday")
-    tuesday: DayHours = Field(default_factory=DayHours, description="Working hours for Tuesday")
-    wednesday: DayHours = Field(default_factory=DayHours, description="Working hours for Wednesday")
-    thursday: DayHours = Field(default_factory=DayHours, description="Working hours for Thursday")
-    friday: DayHours = Field(default_factory=DayHours, description="Working hours for Friday")
-    saturday: DayHours = Field(default_factory=DayHours, description="Working hours for Saturday")
-    sunday: DayHours = Field(default_factory=DayHours, description="Working hours for Sunday")
+    monday: DayHours = Field(default_factory=DayHours)
+    tuesday: DayHours = Field(default_factory=DayHours)
+    wednesday: DayHours = Field(default_factory=DayHours)
+    thursday: DayHours = Field(default_factory=DayHours)
+    friday: DayHours = Field(default_factory=DayHours)
+    saturday: DayHours = Field(default_factory=DayHours)
+    sunday: DayHours = Field(default_factory=DayHours)
 
 
 
 
 
-class RestaurantBase(BaseModel):
-    name: str = Field(..., description="The name of the restaurant")
-    address: str = Field(..., description="The address of the restaurant")
-    contact_number: str = Field(..., description="The contact number of the restaurant")
-    contact_email: str = Field(..., description="The contact email of the restaurant")
-    instagram_link: str | None = Field(None, description="The Instagram link of the restaurant")
-    website_link: str | None = Field(None, description="The website link of the restaurant")
-    wifi_ssid: str | None = Field(None, description="The Wi-Fi Name (SSID) of the restaurant")
-    wifi_password: str | None = Field(None, description="The Wi-Fi password of the restaurant")
-    working_hours: WorkingHours = Field(default_factory=WorkingHours, description="The working hours of the restaurant")
+class RestaurantResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(...)
+    name: str = Field(...)
+    description: str | None = Field(None)
+    longitude: str | None = Field(None)
+    latitude: str | None = Field(None)
+    phone_number: str = Field(...)
+    email: str = Field(...)
+    wifi_name: str | None = Field(None)
+    wifi_password: str | None = Field(None)
+    working_hours: WorkingHours = Field(default_factory=WorkingHours)
 
-class RestaurantCreate(RestaurantBase):
+class RestaurantCreate(BaseModel):
     pass
 
-class RestaurantResponse(RestaurantBase):
+class RestaurantResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    id: int = Field(..., description="The unique identifier of the restaurant")
-    name: str = Field(..., description="The name of the restaurant")
-    owner_id: int | None = Field(None, description="The unique identifier of the owner of the restaurant")
+    id: int = Field(...)
+    name: str = Field(...)
+    owner_id: int | None = Field(None)
