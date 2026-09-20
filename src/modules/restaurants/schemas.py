@@ -29,7 +29,7 @@ class RestaurantResponse(BaseModel):
     wifi_password: str | None = Field(None)
     phone_number: str | None = Field(None)
     email: str = Field(...)
-    working_hours: WorkingHours = Field(default_factory=WorkingHours)
+    working_hours: WorkingHours | None = None
 
 class RestaurantCreate(BaseModel):
     name: str = Field(...)
