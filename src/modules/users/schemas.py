@@ -30,3 +30,8 @@ class UserLogin(BaseModel):
 class LoginResponse(BaseModel):
     user: UserResponse
     tokens: dict[str, str]
+
+class PasswordUpdateRequest(BaseModel):
+    old_password: str
+    new_password: str
+    new_password_confirm: str
