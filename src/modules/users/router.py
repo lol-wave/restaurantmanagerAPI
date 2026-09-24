@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from ...core.security import hash_password, verify_password, create_access_token
+from ...core.security import ALGORITHM, hash_password, verify_password, create_access_token, create_refresh_token, secret_key
 from ...dependencies import get_current_user_id, get_db
 from .models import UserModel
-from .schemas import LoginResponse, PasswordUpdateRequest, UserCreate, UserLogin, UserResponse
-
+from .schemas import LoginResponse, PasswordUpdateRequest, RefreshTokenRequest, UserCreate, UserLogin, UserResponse
 
 
 userrouter = APIRouter()
+router = userrouter
 
 @userrouter.post("/register/", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -41,10 +42,42 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Incorrect login or password!")
 
     access_token = create_access_token({"sub": str(target_user.id)})
-    
+    refresh_token = create_refresh_token({"sub": str(target_user.id)})
+
     return {
         "user": target_user,
-        "tokens": {"access_token": access_token, "token_type": "bearer"},
+        "tokens": {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+        },
+    }
+
+
+@userrouter.post("/refresh/", response_model=LoginResponse)
+def refresh_user_token(data: RefreshTokenRequest, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(data.refresh_token, secret_key, algorithms=[ALGORITHM])
+    except (JWTError, KeyError, TypeError, ValueError):
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    user_id = int(payload["sub"])
+    target_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    access_token = create_access_token({"sub": str(target_user.id)})
+    refresh_token = create_refresh_token({"sub": str(target_user.id)})
+    return {
+        "user": target_user,
+        "tokens": {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+        },
     }
 
 @userrouter.get("/users/{user_id}", response_model=UserResponse)
@@ -123,13 +156,12 @@ def update_phone_number(new_phone_number: str, password: str, db: Session = Depe
     user.phone_number = new_phone_number
     db.commit()
     return {"message": "Phone number updated successfully"}
+
 @userrouter.patch("/full_name/")
-def update_full_name(new_full_name: str, password: str, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
+def update_full_name(new_full_name: str, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
     user = db.query(UserModel).filter(UserModel.id == current_user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if not verify_password(password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect password")
     user.full_name = new_full_name
     db.commit()
     return {"message": "Full name updated successfully"}

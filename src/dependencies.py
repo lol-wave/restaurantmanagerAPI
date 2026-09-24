@@ -17,6 +17,8 @@ def get_current_user_id(
             secret_key,
             algorithms=[ALGORITHM],
         )
+        if payload.get("type") != "access":
+            raise ValueError("Token is not an access token")
         user_id = int(payload["sub"])
     except (JWTError, KeyError, TypeError, ValueError):
         raise HTTPException(
@@ -26,6 +28,7 @@ def get_current_user_id(
         )
 
     return user_id
+
 
 def get_db():
     db = SessionLocal()

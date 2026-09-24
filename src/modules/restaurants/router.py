@@ -50,3 +50,4 @@ def get_restaurant_menu(restaurant_id: int, db: Session = Depends(get_db)):
     if not menu:
         raise HTTPException(status_code=404, detail="Menu not found")
     return menu
+
